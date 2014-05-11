@@ -36,6 +36,12 @@ class PlayState extends FlxState
 
   private var projectiles:FlxTypedGroup<FlxObject>;
 
+  private var deathOverlay:FlxSprite;
+  private var deathText:FlxText;
+  private var deathMessageText:FlxText;
+
+  private var dead:Bool = false;
+
   override public function create():Void {
     super.create();
     Projectile.init();
@@ -86,6 +92,12 @@ class PlayState extends FlxState
 
     var staminaBar = new StaminaBar();
     add(staminaBar);
+
+    deathOverlay = new FlxSprite();
+    deathOverlay.loadGraphic("assets/images/game_over.png");
+    deathOverlay.scrollFactor.x = deathOverlay.scrollFactor.y = 0;
+    deathOverlay.alpha = 0;
+    add(deathOverlay);
   }
 
   override public function update():Void {
@@ -107,5 +119,17 @@ class PlayState extends FlxState
     });
 
     G.dungeonObjects.sort(FlxSort.byY, FlxSort.ASCENDING);
+
+    if(G.player.completelyDead) {
+      if(!dead) {
+        dead = true;
+        new FlxTimer(0.5, function(t) {
+          FlxTween.tween(deathOverlay, { alpha: 1 }, 1, { ease: FlxEase.quadIn });
+        });
+      }
+      if(FlxG.mouse.justPressed) {
+        FlxG.switchState(new PlayState());
+      }
+    }
   }
 }

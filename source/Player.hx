@@ -38,6 +38,7 @@ class Player extends FlxSprite
   public var started:Bool = false;
 
   public var stamina:Float = 0;
+  public var shadow:FlxSprite;
 
   var staminaTimer:Float = 0;
   var staminaTime:Float = 0.5;
@@ -49,6 +50,8 @@ class Player extends FlxSprite
   var shooting:Bool = false;
   var justHurt:Bool = false;
   var dead:Bool = false;
+
+  public var completelyDead:Bool = false;
 
   public function new() {
     super();
@@ -66,7 +69,7 @@ class Player extends FlxSprite
     animation.add("dash", [12]);
     animation.add("shoot", [12]);
     animation.add("hurt", [13]);
-    animation.add("die", [14,14,14,14,14,14,15,16,17,18,19], 15, false);
+    animation.add("die", [14,14,14,14,15,16,17,18,19,19], 20, false);
     animation.callback = onAnimate;
 
     width = 22;
@@ -80,6 +83,9 @@ class Player extends FlxSprite
 
   public override function update():Void {
     if(dead) {
+      if(FlxG.timeScale < 1) {
+        FlxG.timeScale += FlxG.elapsed * 2;
+      }
       super.update();
       return;
     }
@@ -136,6 +142,7 @@ class Player extends FlxSprite
     health = 0;
     dead = true;
     animation.play("die");
+    FlxG.timeScale = 0.1;
   }
 
   private function processMovement():Void {
@@ -264,6 +271,11 @@ class Player extends FlxSprite
       if (frame == 0 || frame == 4) {
         FlxG.sound.play("assets/sounds/footsteps/" + FlxRandom.intRanged(1,2) + ".wav", 0.3);
       }
+    }
+
+    if (name == "die" && frame == 8) {
+      completelyDead = true;
+      visible = false;
     }
   }
 }
