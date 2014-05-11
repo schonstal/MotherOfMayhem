@@ -11,6 +11,7 @@ import flixel.group.FlxTypedGroup;
 
 import flixel.util.FlxVector;
 import flixel.util.FlxRandom;
+import flixel.util.FlxTimer;
 
 import flash.display.BlendMode;
 
@@ -31,7 +32,7 @@ class Player extends FlxSprite
   inline static var RECOIL_SPEED = -200;
   inline static var RECOIL_DURATION = 0.2;
 
-  public var invulnerable:Bool = true;
+  public var invulnerable:Bool = false;
   public var started:Bool = false;
 
   var dashTween:VarTween;
@@ -39,6 +40,7 @@ class Player extends FlxSprite
   
   var dashing:Bool = false;
   var shooting:Bool = false;
+  var justHurt:Bool = false;
 
   public function new() {
     super();
@@ -52,6 +54,7 @@ class Player extends FlxSprite
     animation.add("idle", [0,1,1,2,3,3], 10);
     animation.add("dash", [12]);
     animation.add("shoot", [12]);
+    animation.add("hurt", [13]);
     animation.callback = onAnimate;
 
     width = 22;
@@ -75,13 +78,30 @@ class Player extends FlxSprite
 
     facing = FlxG.mouse.x < x + width/2 ? FlxObject.LEFT : FlxObject.RIGHT;
 
-    if(!dashing) {
+    if(!dashing && !justHurt) {
       processMovement();
-    } else {
+    } else if(dashing) {
       animation.play("dash");
     }
 
+    if(justHurt && Math.abs(velocity.x) < 1 && Math.abs(velocity.y) < 1) {
+      onDashComplete(dashTween);
+    }
+
     super.update();
+  }
+
+  public function hit(damage:Int=0, direction:FlxVector):Void {
+    velocity.x = direction.x * 100;
+    velocity.y = direction.y * 100;
+    drag.x = 400;
+    drag.y = 400;
+    animation.play("hurt");
+    justHurt = true;
+    invulnerable = true;
+    alpha = 0.6;
+    G.reticle.deactivate();
+    FlxG.camera.shake(damage * 0.0075, 0.3);
   }
 
   private function processMovement():Void {
@@ -124,7 +144,7 @@ class Player extends FlxSprite
   }
 
   private function shootProjectile():Void {
-    if(shooting) return;
+    if(shooting || justHurt) return;
 
     G.reticle.deactivate();
     shooting = true;
@@ -179,11 +199,15 @@ class Player extends FlxSprite
     velocity.x = velocity.y = 0;
   }
 
+
   private function onDashComplete(callback):Void {
     dashing = false;
     shooting = false;
+    justHurt = false;
     drag.x = drag.y = 0;
     G.reticle.activate();
+    invulnerable = false;
+    alpha = 1;
   }
 
   private function onIframeComplete(callback):Void {

@@ -80,8 +80,6 @@ class PlayState extends FlxState
     G.dungeonObjects.add(slime);
     }
     }
-
-//    add(new Slime(, 100));
   }
 
   override public function update():Void {
@@ -89,7 +87,14 @@ class PlayState extends FlxState
     FlxG.collide(G.player, G.dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
     FlxG.collide(enemies, G.dungeon.collisionTilemap);
 
-    FlxG.collide(enemies, G.player);
+    FlxG.overlap(enemies, G.player, function(enemy, player):Void {
+      if(Std.is(enemy, Slime)) {
+        if(!G.player.invulnerable && enemy.dashing) {
+          FlxG.collide(cast(enemy, Slime), G.player);
+          player.hit(1, enemy.direction);
+        }
+      }
+    });
 
     FlxG.collide(G.projectiles, G.dungeon.wallTilemap, function(a,b):Void {
       if(Std.is(a, ProjectileSprite)) a.onCollide();

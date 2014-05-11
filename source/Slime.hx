@@ -23,16 +23,19 @@ import flixel.tweens.misc.VarTween;
 
 class Slime extends FlxSprite
 {
-  inline static var DASH_SPEED = 1000;
+  inline static var DASH_SPEED = 600;
+  inline static var DASH_DRAG = 3;
   inline static var DASH_TIME = 0.6;
 
   static var OFFSET_Y = 15;
   static var OFFSET_X = 4;
 
+  public var direction:FlxVector;
+
+  public var started:Bool = false;
+  public var dashing:Bool = false;
   var shaking:Bool = false;
-  var dashing:Bool = false;
   var seeking:Bool = false;
-  var started:Bool = false;
 
   public function new(X:Float=0, Y:Float=0) {
     super();
@@ -82,7 +85,7 @@ class Slime extends FlxSprite
       offset.x = OFFSET_X;
     }
 
-    if(dashing == true && Math.abs(velocity.x) < 1 && Math.abs(velocity.y) < 1) {
+    if(dashing && Math.abs(velocity.x) < 1 && Math.abs(velocity.y) < 1) {
       onDashComplete();
     }
 
@@ -93,7 +96,7 @@ class Slime extends FlxSprite
   }
 
   private function startDash():Void {
-    var direction = new FlxVector(G.player.x - x, G.player.y - y).normalize();
+    direction = new FlxVector(G.player.x - x, G.player.y - y).normalize();
 
     velocity.x = direction.x * -100;
     velocity.y = direction.y * -100;
@@ -102,15 +105,15 @@ class Slime extends FlxSprite
   }
 
   private function dash():Void {
-    var direction = new FlxVector(G.player.x - x, G.player.y - y).normalize();
+    direction = new FlxVector(G.player.x - x, G.player.y - y).normalize();
     shaking = false;
     dashing = true;
 
     velocity.x = direction.x * DASH_SPEED;
     velocity.y = direction.y * DASH_SPEED;
 
-    drag.x = Math.abs(direction.x) * DASH_SPEED * 4;
-    drag.y = Math.abs(direction.y) * DASH_SPEED * 4;
+    drag.x = Math.abs(direction.x) * DASH_SPEED * DASH_DRAG;
+    drag.y = Math.abs(direction.y) * DASH_SPEED * DASH_DRAG;
 
     animation.play("dash");
   }
