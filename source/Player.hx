@@ -22,7 +22,7 @@ import flixel.tweens.misc.VarTween;
 
 class Player extends FlxSprite
 {
-  inline static var SPEED = 130;
+  inline static var SPEED = 110;
 
   inline static var DASH_DURATION = 0.25;
   inline static var DASH_SPEED = 500;

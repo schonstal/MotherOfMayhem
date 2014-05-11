@@ -26,8 +26,8 @@ class Slime extends FlxSprite
   inline static var DASH_SPEED = 1000;
   inline static var DASH_TIME = 0.6;
 
-  inline static var OFFSET_Y = 0;
-  inline static var OFFSET_X = 0;
+  static var OFFSET_Y = 15;
+  static var OFFSET_X = 4;
 
   var shaking:Bool = false;
   var dashing:Bool = false;
@@ -39,10 +39,12 @@ class Slime extends FlxSprite
 
     x = X;
     y = Y;
-
     offset.y = OFFSET_Y + 100;
 
     loadGraphic("assets/images/areas/" + G.world + "/slime.png", true, 32, 32);
+
+    width = 24;
+    height = 12;
 
     animation.add("fall", [0]);
     animation.add("land", [1, 2, 3, 4], 15, false);
@@ -73,8 +75,8 @@ class Slime extends FlxSprite
     if(!started) return;
 
     if(shaking) {
-      offset.x = FlxRandom.intRanged(-1,1);
-      offset.y = FlxRandom.intRanged(-1,1);
+      offset.x = OFFSET_X + FlxRandom.intRanged(-1,1);
+      offset.y = OFFSET_Y + FlxRandom.intRanged(-1,1);
     } else {
       offset.y = OFFSET_Y;
       offset.x = OFFSET_X;
@@ -84,9 +86,9 @@ class Slime extends FlxSprite
       onDashComplete();
     }
 
-    if (seeking) {
+    if (seeking && G.dungeon.collisionTilemap.ray(G.player.getMidpoint(), getMidpoint())) {
       seeking = false;
-      new FlxTimer().start(FlxRandom.floatRanged(2, 5), function(t) { startDash(); });
+      startDash();
     }
   }
 
@@ -119,8 +121,8 @@ class Slime extends FlxSprite
 
   private function onDashComplete():Void {
     dashing = false;
+    new FlxTimer().start(FlxRandom.floatRanged(0, 1), function(t) { seeking = true; });
     animation.play("return");
-    new FlxTimer().start(FlxRandom.floatRanged(0, 1), function(t) { startDash(); });
   }
 
   private function onAnimate(name:String, frame:Int, frameIndex:Int):Void {
