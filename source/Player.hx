@@ -32,8 +32,15 @@ class Player extends FlxSprite
   inline static var RECOIL_SPEED = -200;
   inline static var RECOIL_DURATION = 0.2;
 
+  inline static var STAMINA_REGEN = 30;
+
   public var invulnerable:Bool = false;
   public var started:Bool = false;
+
+  public var stamina:Float = 0;
+
+  var staminaTimer:Float = 0;
+  var staminaTime:Float = 0.5;
 
   var dashTween:VarTween;
   var dashScaleTween:VarTween;
@@ -41,9 +48,13 @@ class Player extends FlxSprite
   var dashing:Bool = false;
   var shooting:Bool = false;
   var justHurt:Bool = false;
+  var dead:Bool = false;
 
   public function new() {
     super();
+
+    health = G.maxHealth;
+    stamina = G.maxStamina;
 
     loadGraphic("assets/images/player.png", true, 32, 32);
     setFacingFlip(FlxObject.LEFT, false, false);
@@ -55,6 +66,7 @@ class Player extends FlxSprite
     animation.add("dash", [12]);
     animation.add("shoot", [12]);
     animation.add("hurt", [13]);
+    animation.add("die", [14,14,14,14,14,14,15,16,17,18,19], 15, false);
     animation.callback = onAnimate;
 
     width = 22;
@@ -67,11 +79,23 @@ class Player extends FlxSprite
   }
 
   public override function update():Void {
+    if(dead) {
+      super.update();
+      return;
+    }
+
     if(!started) {
       velocity.x = velocity.y = 0;
       animation.play("idle");
       super.update();
       return;
+    }
+
+    staminaTimer += FlxG.elapsed;
+    if(staminaTimer >= staminaTime) {
+      if(stamina <= G.maxStamina) stamina += FlxG.elapsed * STAMINA_REGEN;
+      else stamina = G.maxStamina;
+      staminaTime = 0.5;
     }
 
     if(FlxG.keys.justPressed.UP) G.projectileLevel++;
@@ -102,6 +126,16 @@ class Player extends FlxSprite
     alpha = 0.6;
     G.reticle.deactivate();
     FlxG.camera.shake(damage * 0.0075, 0.3);
+    health -= damage;
+    if(health <= 0) {
+      die();
+    }
+  }
+
+  private function die():Void {
+    health = 0;
+    dead = true;
+    animation.play("die");
   }
 
   private function processMovement():Void {
@@ -144,14 +178,14 @@ class Player extends FlxSprite
   }
 
   private function shootProjectile():Void {
-    if(shooting || justHurt) return;
+    if(shooting || justHurt || !useStamina(30)) return;
 
     G.reticle.deactivate();
     shooting = true;
 
     FlxG.sound.play("assets/sounds/fire_orb.wav");
     dashing = true;
-    var p:Projectile = Projectile.recycled(x,y);
+    var p:Projectile = Projectile.recycled(getMidpoint().x,getMidpoint().y);
     G.dungeonObjects.add(p);
 
     velocity.x = p.direction.x * RECOIL_SPEED;
@@ -171,7 +205,7 @@ class Player extends FlxSprite
   }
 
   private function startDash(direction:FlxVector):Void {
-    if(shooting) return;
+    if(shooting || justHurt || !useStamina(40)) return;
     FlxG.sound.play("assets/sounds/dash.wav", 0.3);
 
     velocity.x = direction.x * DASH_SPEED;
@@ -212,6 +246,17 @@ class Player extends FlxSprite
 
   private function onIframeComplete(callback):Void {
     invulnerable = false;
+  }
+
+  private function useStamina(value:Int):Bool {
+    if (stamina <= 0) return false;
+    stamina -= value;
+    staminaTimer = 0;
+    if(stamina < 0) {
+      stamina = 0;
+      staminaTime = 1;
+    }
+    return true;
   }
 
   private function onAnimate(name:String, frame:Int, frameIndex:Int):Void {

@@ -31,8 +31,6 @@ class Projectile extends FlxSpriteGroup
 
     shadow = new FlxSprite();
     shadow.loadGraphic("assets/images/projectiles/player/shadow.png");
-    shadow.offset.y = 3;
-    shadow.offset.x = 1;
     shadow.solid = false;
     add(shadow);
     
@@ -63,13 +61,22 @@ class Projectile extends FlxSpriteGroup
     shadow.x = X;
     shadow.y = Y;
 
-    projectile.scale.x = projectile.scale.y = 0.25 * G.projectileLevel;
+    scale.x = scale.y = 0.5 * G.projectileLevel;
+    projectile.scale = scale;
+    explosionSprite.scale = scale;
+
+    shadow.scale = scale;
+    shadow.updateHitbox();
+    projectile.updateHitbox();
+
+    shadow.width = projectile.width = scale.x * ProjectileSprite.WIDTH;
+    shadow.height = projectile.height = scale.y * ProjectileSprite.HEIGHT; 
 
     exists = projectile.exists = shadow.exists = particleGroup.exists = explosionSprite.exists = true;
     spawnParticle();
 
     explosionSprite.visible = false;
-    direction = new FlxVector(FlxG.mouse.x - projectile.x - 8, FlxG.mouse.y - projectile.y + 6).normalize();
+    direction = new FlxVector(G.reticle.getMidpoint().x - projectile.getMidpoint().x, G.reticle.getMidpoint().y - projectile.getMidpoint().y + 8).normalize();
     projectile.velocity.x = direction.x * SPEED;
     projectile.velocity.y = direction.y * SPEED;
     shadow.velocity = projectile.velocity;
@@ -96,9 +103,9 @@ class Projectile extends FlxSpriteGroup
       particleGroup.add(particle);
     }
 
-    particle.scale.x = particle.scale.y = 0.25 * G.projectileLevel;
-    particle.x = projectile.x + FlxRandom.intRanged(-5, 5) + 4;
-    particle.y = projectile.y + FlxRandom.intRanged(-5, 5) - 12;
+    particle.scale = scale;
+    particle.x = projectile.x + FlxRandom.intRanged(-3, 3) - 5;
+    particle.y = projectile.y + FlxRandom.intRanged(-3, 3) - 22;
     particle.velocity.x = projectile.velocity.x/4;
     particle.velocity.y = projectile.velocity.y/4;
 

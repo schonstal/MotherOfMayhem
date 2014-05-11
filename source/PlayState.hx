@@ -80,6 +80,12 @@ class PlayState extends FlxState
     G.dungeonObjects.add(slime);
     }
     }
+    
+    var healthBar = new HealthBar();
+    add(healthBar);
+
+    var staminaBar = new StaminaBar();
+    add(staminaBar);
   }
 
   override public function update():Void {
