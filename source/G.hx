@@ -11,6 +11,7 @@ class G
   public static var dungeonObjects:FlxTypedGroup<FlxObject>;
   public static var dungeon:Dungeon;
   public static var reticle:Reticle;
+  public static var slimeLocations:Array<FlxPoint>;
 
   public static var projectileLevel = 1;
   public static var maxHealth = 6;
@@ -21,4 +22,11 @@ class G
   public static var level = 1;
   public static var world = 1;
 
+  public static function init() {
+    projectileLevel = 1;
+    maxHealth = 6;
+    maxStamina = 100;
+    level = 1;
+    world = 1;
+  }
 }

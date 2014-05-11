@@ -47,6 +47,9 @@ class DungeonTiles
           var localX = Std.int(position.x) + x;
 
           tiles[localY][localX] = FlxRandom.intRanged(3,11);
+          if(FlxRandom.chanceRoll(3)) {
+            G.slimeLocations.push(new FlxPoint(localX - Dungeon.SIZE/2, localY - Dungeon.SIZE/2));
+          }
         }
       }
       changeDirection();

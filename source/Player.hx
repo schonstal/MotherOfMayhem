@@ -132,6 +132,7 @@ class Player extends FlxSprite
 
   public function hit(damage:Int=0, direction:FlxVector):Void {
     if(invulnerable) return;
+    FlxG.camera.flash(0x88c1212c, 0.3);
 
     velocity.x = direction.x * 100;
     velocity.y = direction.y * 100;

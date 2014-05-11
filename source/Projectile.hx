@@ -17,6 +17,7 @@ class Projectile extends FlxSpriteGroup
   inline static var SPEED = 200;
 
   public var direction:FlxVector;
+  public var physical = true;
 
   static var projectiles:Array<Projectile> = new Array<Projectile>();
 
@@ -42,8 +43,6 @@ class Projectile extends FlxSpriteGroup
     projectile.onCollisionCallback = onCollide;
     add(projectile);
 
-    G.projectiles.add(this);
-
     explosionSprite = new FlxSprite();
     explosionSprite.loadGraphic("assets/images/projectiles/player/hit.png", true, 64, 64);
     explosionSprite.animation.add("explode", [0,1,2,3,4,5], 20, false);
@@ -60,6 +59,8 @@ class Projectile extends FlxSpriteGroup
     projectile.y = Y;
     shadow.x = X;
     shadow.y = Y;
+    physical = true;
+    visible = true;
 
     scale.x = scale.y = 0.5 * G.projectileLevel;
     projectile.scale = scale;
@@ -80,6 +81,8 @@ class Projectile extends FlxSpriteGroup
     projectile.velocity.x = direction.x * SPEED;
     projectile.velocity.y = direction.y * SPEED;
     shadow.velocity = projectile.velocity;
+
+    G.projectiles.add(this);
   }
 
   private function spawnParticle():FlxSprite {
@@ -118,11 +121,15 @@ class Projectile extends FlxSpriteGroup
   }
 
   public function onCollide():Void {
+    if(!physical) return;
+    physical = false;
+
     explosionSprite.x = projectile.x - 26;
     explosionSprite.y = projectile.y - 38;
     explosionSprite.visible = true;
     explosionSprite.animation.play("explode");
-    new FlxTimer().start(6.0/20.0, function(t) { exists = false; });
+    new FlxTimer().start(6.0/20.0, function(t) { visible = false; });
+    new FlxTimer().start(3, function(t) { exists = false; });
     projectile.exists = shadow.exists = false;
     FlxG.camera.shake(0.02, 0.3);
     FlxG.sound.play("assets/sounds/orb_explode.wav");

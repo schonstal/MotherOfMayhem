@@ -34,6 +34,7 @@ class PlayState extends FlxState
 
   private var dungeon:Dungeon;
   private var enemies:FlxTypedGroup<FlxObject>;
+  private var deadEnemies:FlxTypedGroup<FlxObject>;
 
   private var projectiles:FlxTypedGroup<FlxObject>;
 
@@ -46,6 +47,8 @@ class PlayState extends FlxState
   override public function create():Void {
     super.create();
     Projectile.init();
+    G.init();
+    G.slimeLocations = new Array<FlxPoint>();
 
     FlxG.camera.flash(0x181d23, 1);
     FlxG.mouse.visible = false;
@@ -80,14 +83,15 @@ class PlayState extends FlxState
     FlxG.camera.pixelPerfectRender = false;
 
     enemies = new FlxTypedGroup<FlxObject>();
+    deadEnemies = new FlxTypedGroup<FlxObject>();
 
-    for(i in 0...2) {
-    for(j in 0...2) {
-    var slime = new Slime(i*32,j*32);
-    enemies.add(slime);
-    G.dungeonObjects.add(slime);
-    G.dungeonObjects.add(slime.shadow);
-    }
+    for(location in G.slimeLocations) {
+      if((location.x > 1 || location.x < -1) && (location.y > 1 || location.y < -1)) {
+        var slime = new Slime(location.x*32,location.y*32);
+        enemies.add(slime);
+        G.dungeonObjects.add(slime);
+        G.dungeonObjects.add(slime.shadow);
+      }
     }
     
     var healthBar = new HealthBar();
@@ -109,6 +113,7 @@ class PlayState extends FlxState
     super.update();
     FlxG.collide(G.player, G.dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
     FlxG.collide(enemies, G.dungeon.collisionTilemap);
+    FlxG.collide(deadEnemies, G.dungeon.collisionTilemap);
 
     FlxG.overlap(enemies, G.player, function(enemy, player):Void {
       if(Std.is(enemy, Slime)) {
@@ -123,14 +128,20 @@ class PlayState extends FlxState
       if(Std.is(a, ProjectileSprite)) a.onCollide();
     });
 
-    FlxG.collide(G.projectiles, enemies, function(projectile, enemy):Void {
-      if(Std.is(projectile, ProjectileSprite)) projectile.onCollide();
-
-      var direction:FlxVector = new FlxVector(projectile.velocity.x, projectile.velocity.y);
+    FlxG.overlap(G.projectiles, enemies, function(projectile, enemy):Void {
       if(Std.is(enemy, Slime)) {
-        enemy.hit(G.projectileLevel, direction.normalize());
-        if(enemy.dead) {
-          enemies.remove(cast(enemy, FlxObject));
+        if(!enemy.started) return;
+
+        if(Std.is(projectile, ProjectileSprite)) {
+          projectile.onCollide();
+
+          var direction:FlxVector = new FlxVector(projectile.velocity.x, projectile.velocity.y);
+
+          enemy.hit(G.projectileLevel, direction.normalize());
+          if(enemy.dead) {
+            enemies.remove(cast(enemy, FlxObject));
+            deadEnemies.add(cast(enemy, Slime));
+          }
         }
       }
     });
