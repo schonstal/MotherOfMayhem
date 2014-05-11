@@ -60,6 +60,7 @@ class PlayState extends FlxState
 
     G.player = new Player();
     G.dungeonObjects.add(G.player);
+    G.dungeonObjects.add(G.player.shadow);
     add(G.dungeonObjects);
 
     add(G.dungeon.wallTopTilemap);

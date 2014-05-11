@@ -79,9 +79,14 @@ class Player extends FlxSprite
 
     x = 36;
     y = 0;
+
+    shadow = new FlxSprite();
+    shadow.loadGraphic("assets/images/player_shadow.png");
   }
 
   public override function update():Void {
+    shadow.x = x;
+    shadow.y = y - 1;
     if(dead) {
       if(FlxG.timeScale < 1) {
         FlxG.timeScale += FlxG.elapsed * 2;
