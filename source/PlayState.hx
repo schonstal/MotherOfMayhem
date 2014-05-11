@@ -32,6 +32,7 @@ class PlayState extends FlxState
   private var water:FlxSprite;
 
   private var dungeon:Dungeon;
+  private var enemies:FlxTypedGroup<FlxObject>;
 
   private var projectiles:FlxTypedGroup<FlxObject>;
 
@@ -44,8 +45,8 @@ class PlayState extends FlxState
     FlxG.debugger.drawDebug = true;
     FlxG.debugger.visible = true;
 
-    dungeon = new Dungeon();
-    add(dungeon);
+    G.dungeon = new Dungeon();
+    add(G.dungeon);
     
     G.reticle = new Reticle();
     G.dungeonObjects = new FlxTypedGroup<FlxObject>();
@@ -55,7 +56,7 @@ class PlayState extends FlxState
     G.dungeonObjects.add(G.player);
     add(G.dungeonObjects);
 
-    add(dungeon.wallTopTilemap);
+    add(G.dungeon.wallTopTilemap);
 
     cameraManager = new CameraManager(G.player);
     add(cameraManager);
@@ -65,20 +66,32 @@ class PlayState extends FlxState
     add(G.reticle);
 
     FlxG.worldBounds.width = FlxG.worldBounds.height = Dungeon.SIZE * 32;
-    FlxG.worldBounds.x = dungeon.wallTilemap.x;
-    FlxG.worldBounds.y = dungeon.wallTilemap.y;
+    FlxG.worldBounds.x = G.dungeon.wallTilemap.x;
+    FlxG.worldBounds.y = G.dungeon.wallTilemap.y;
 
     FlxG.camera.pixelPerfectRender = false;
 
-    add(new Slime());
+    enemies = new FlxTypedGroup<FlxObject>();
+
+    for(i in 0...2) {
+    for(j in 0...2) {
+    var slime = new Slime(i*32,j*32);
+    enemies.add(slime);
+    G.dungeonObjects.add(slime);
+    }
+    }
+
 //    add(new Slime(, 100));
   }
 
   override public function update():Void {
     super.update();
-    FlxG.collide(G.player, dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
+    FlxG.collide(G.player, G.dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
+    FlxG.collide(enemies, G.dungeon.collisionTilemap);
 
-    FlxG.collide(G.projectiles, dungeon.wallTilemap, function(a,b):Void {
+    FlxG.collide(enemies, G.player);
+
+    FlxG.collide(G.projectiles, G.dungeon.wallTilemap, function(a,b):Void {
       if(Std.is(a, ProjectileSprite)) a.onCollide();
     });
 

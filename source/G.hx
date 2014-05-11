@@ -9,6 +9,7 @@ class G
 {
   public static var projectiles:FlxTypedGroup<FlxObject>;
   public static var dungeonObjects:FlxTypedGroup<FlxObject>;
+  public static var dungeon:Dungeon;
   public static var reticle:Reticle;
 
   public static var projectileLevel = 1;
