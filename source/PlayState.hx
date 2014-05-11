@@ -16,6 +16,7 @@ import flixel.util.FlxRandom;
 import flixel.util.FlxPoint;
 import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
+import flixel.util.FlxVector;
 
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxEase.EaseFunction;
@@ -85,6 +86,7 @@ class PlayState extends FlxState
     var slime = new Slime(i*32,j*32);
     enemies.add(slime);
     G.dungeonObjects.add(slime);
+    G.dungeonObjects.add(slime.shadow);
     }
     }
     
@@ -99,6 +101,8 @@ class PlayState extends FlxState
     deathOverlay.scrollFactor.x = deathOverlay.scrollFactor.y = 0;
     deathOverlay.alpha = 0;
     add(deathOverlay);
+
+    FlxG.sound.playMusic("assets/music/areas/" + G.world + "/a.wav");
   }
 
   override public function update():Void {
@@ -117,6 +121,18 @@ class PlayState extends FlxState
 
     FlxG.collide(G.projectiles, G.dungeon.wallTilemap, function(a,b):Void {
       if(Std.is(a, ProjectileSprite)) a.onCollide();
+    });
+
+    FlxG.collide(G.projectiles, enemies, function(projectile, enemy):Void {
+      if(Std.is(projectile, ProjectileSprite)) projectile.onCollide();
+
+      var direction:FlxVector = new FlxVector(projectile.velocity.x, projectile.velocity.y);
+      if(Std.is(enemy, Slime)) {
+        enemy.hit(G.projectileLevel, direction.normalize());
+        if(enemy.dead) {
+          enemies.remove(cast(enemy, FlxObject));
+        }
+      }
     });
 
     G.dungeonObjects.sort(FlxSort.byY, FlxSort.ASCENDING);

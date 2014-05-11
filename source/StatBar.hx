@@ -17,14 +17,14 @@ class StatBar extends FlxTypedGroup<FlxObject>
 {
   public var height = 8;
 
-  var barWidth:Int;
+  public var barWidth:Int;
 
-  var borderWidth:FlxSprite;
-  var borderHeight:FlxSprite;
-  var borderShadowWidth:FlxSprite;
-  var borderShadowHeight:FlxSprite;
-  var background:FlxSprite;
-  var bar:FlxSprite;
+  public var borderWidth:FlxSprite;
+  public var borderHeight:FlxSprite;
+  public var borderShadowWidth:FlxSprite;
+  public var borderShadowHeight:FlxSprite;
+  public var background:FlxSprite;
+  public var bar:FlxSprite;
 
   var barColor:Int;
   var borderColor:Int;
@@ -113,7 +113,7 @@ class StatBar extends FlxTypedGroup<FlxObject>
 
   // Value from 0-1, percentage.
   public function setBar(Value:Float):Void {
-    bar.scale.x = barWidth * Value;
+    bar.scale.x = Std.int(barWidth * Value);
     bar.scale.y = height;
 
     bar.offset.x = -bar.scale.x / 2;

@@ -32,7 +32,7 @@ class Player extends FlxSprite
   inline static var RECOIL_SPEED = -200;
   inline static var RECOIL_DURATION = 0.2;
 
-  inline static var STAMINA_REGEN = 30;
+  inline static var STAMINA_REGEN = 100;
 
   public var invulnerable:Bool = false;
   public var started:Bool = false;
@@ -82,23 +82,29 @@ class Player extends FlxSprite
 
     shadow = new FlxSprite();
     shadow.loadGraphic("assets/images/player_shadow.png");
+    shadow.offset.y = -8;
+    shadow.offset.x = -2;
+  }
+
+  public function updateShadow():Void {
+    shadow.x = x;
+    shadow.y = y - 1;
   }
 
   public override function update():Void {
-    shadow.x = x;
-    shadow.y = y - 1;
+    super.update();
+    updateShadow();
+
     if(dead) {
       if(FlxG.timeScale < 1) {
         FlxG.timeScale += FlxG.elapsed * 2;
       }
-      super.update();
       return;
     }
 
     if(!started) {
       velocity.x = velocity.y = 0;
       animation.play("idle");
-      super.update();
       return;
     }
 
@@ -122,11 +128,11 @@ class Player extends FlxSprite
     if(justHurt && Math.abs(velocity.x) < 1 && Math.abs(velocity.y) < 1) {
       onDashComplete(dashTween);
     }
-
-    super.update();
   }
 
   public function hit(damage:Int=0, direction:FlxVector):Void {
+    if(invulnerable) return;
+
     velocity.x = direction.x * 100;
     velocity.y = direction.y * 100;
     drag.x = 400;
@@ -281,6 +287,7 @@ class Player extends FlxSprite
     if (name == "die" && frame == 8) {
       completelyDead = true;
       visible = false;
+      shadow.visible = false;
     }
   }
 }
