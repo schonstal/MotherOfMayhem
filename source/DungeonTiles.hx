@@ -46,21 +46,10 @@ class DungeonTiles
           var localY = Std.int(position.y) + y;
           var localX = Std.int(position.x) + x;
 
-          if (dirty) {
-            tiles[localY][localX] = FlxRandom.intRanged(3,11);
-          } else {
-            tiles[localY][localX] = ((localY + localX) % 2 == 0 ? 1 : 2);
-          }
+          tiles[localY][localX] = FlxRandom.intRanged(3,11);
         }
       }
       changeDirection();
-      getDirty();
-    }
-  }
-
-  private function getDirty():Void {
-    if (FlxRandom.chanceRoll(5)) {
-      dirty = !dirty;
     }
   }
 

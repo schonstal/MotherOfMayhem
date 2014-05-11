@@ -28,7 +28,6 @@ import flash.filters.ColorMatrixFilter;
 
 class PlayState extends FlxState
 {
-  private var player:Player;
   private var cameraManager:CameraManager;
   private var water:FlxSprite;
 
@@ -52,16 +51,16 @@ class PlayState extends FlxState
     G.dungeonObjects = new FlxTypedGroup<FlxObject>();
     G.projectiles = new FlxTypedGroup<FlxObject>();
 
-    player = new Player();
-    G.dungeonObjects.add(player);
+    G.player = new Player();
+    G.dungeonObjects.add(G.player);
     add(G.dungeonObjects);
 
     add(dungeon.wallTopTilemap);
 
-    cameraManager = new CameraManager(player);
+    cameraManager = new CameraManager(G.player);
     add(cameraManager);
 
-    player.started = true;
+    G.player.started = true;
 
     add(G.reticle);
 
@@ -70,11 +69,14 @@ class PlayState extends FlxState
     FlxG.worldBounds.y = dungeon.wallTilemap.y;
 
     FlxG.camera.pixelPerfectRender = false;
+
+    add(new Slime());
+//    add(new Slime(, 100));
   }
 
   override public function update():Void {
     super.update();
-    FlxG.collide(player, dungeon.collisionTilemap, function(a,b):Void { player.cancelDash(); });
+    FlxG.collide(G.player, dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
 
     FlxG.collide(G.projectiles, dungeon.wallTilemap, function(a,b):Void {
       if(Std.is(a, ProjectileSprite)) a.onCollide();

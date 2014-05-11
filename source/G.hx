@@ -11,5 +11,10 @@ class G
   public static var dungeonObjects:FlxTypedGroup<FlxObject>;
   public static var reticle:Reticle;
 
-  public static var level = 0;
+  public static var projectileLevel = 1;
+
+  public static var player:Player;
+
+  public static var level = 1;
+  public static var world = 1;
 }

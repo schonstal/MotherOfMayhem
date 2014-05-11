@@ -22,14 +22,14 @@ import flixel.tweens.misc.VarTween;
 
 class Player extends FlxSprite
 {
-  inline static var SPEED = 100;
+  inline static var SPEED = 130;
 
   inline static var DASH_DURATION = 0.25;
   inline static var DASH_SPEED = 500;
   inline static var IFRAME_DURATION = 0.25;
 
-  inline static var RECOIL_DISTANCE = -20;
-  inline static var RECOIL_DURATION = 0.4;
+  inline static var RECOIL_SPEED = -200;
+  inline static var RECOIL_DURATION = 0.2;
 
   public var invulnerable:Bool = true;
   public var started:Bool = false;
@@ -44,13 +44,14 @@ class Player extends FlxSprite
     super();
 
     loadGraphic("assets/images/player.png", true, 32, 32);
-    setFacingFlip(FlxObject.LEFT, true, false);
-    setFacingFlip(FlxObject.RIGHT, false, false);
+    setFacingFlip(FlxObject.LEFT, false, false);
+    setFacingFlip(FlxObject.RIGHT, true, false);
 
     animation.add("walk", [4,5,6,7,8,9,10,11], 15, true);
     animation.add("walkBackwards", [4,11,10,9,8,7,6,5], 15, true);
-    animation.add("idle", [0,0,1,2,3,3], 10);
-    animation.add("dash", [0]);
+    animation.add("idle", [0,1,1,2,3,3], 10);
+    animation.add("dash", [12]);
+    animation.add("shoot", [12]);
     animation.callback = onAnimate;
 
     width = 22;
@@ -69,6 +70,8 @@ class Player extends FlxSprite
       super.update();
       return;
     }
+
+    if(FlxG.keys.justPressed.UP) G.projectileLevel++;
 
     facing = FlxG.mouse.x < x + width/2 ? FlxObject.LEFT : FlxObject.RIGHT;
 
@@ -131,14 +134,16 @@ class Player extends FlxSprite
     var p:Projectile = Projectile.recycled(x,y);
     G.dungeonObjects.add(p);
 
-    scale.x = 0.8;
-    scale.y = 1.2;
+    velocity.x = p.direction.x * RECOIL_SPEED;
+    velocity.y = p.direction.y * RECOIL_SPEED;
 
-    dashTween = FlxTween.tween(this, {
-      x: x + (p.direction.x * RECOIL_DISTANCE),
-      y: y + (p.direction.y * RECOIL_DISTANCE)
-    }, RECOIL_DURATION, { ease: FlxEase.quintOut });
-    
+    scale.x = 1.2;
+    scale.y = 0.8;
+
+    drag.x = Math.abs(p.direction.x) * RECOIL_SPEED * -6;
+    drag.y = Math.abs(p.direction.y) * RECOIL_SPEED * -6;
+    animation.play("shoot");
+
     dashScaleTween = FlxTween.tween(scale, {
       x: 1,
       y: 1
