@@ -28,7 +28,7 @@ class Dungeon extends FlxGroup
 
     groundTilemap = new FlxTilemap();
     groundTilemap.loadMap(FlxStringUtil.arrayToCSV(flattenArray(dungeonTiles.tiles), SIZE),
-                          "assets/images/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
+                          "assets/images/areas/" + G.world + "/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
     groundTilemap.x = (-SIZE/2) * 32;
     groundTilemap.y = (-SIZE/2) * 32;
     add(groundTilemap);
@@ -44,14 +44,14 @@ class Dungeon extends FlxGroup
       }
     }
     collisionTilemap.loadMap(FlxStringUtil.arrayToCSV(collisionArray, SIZE),
-                          "assets/images/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
+                          "assets/images/areas/" + G.world + "/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
     collisionTilemap.x = groundTilemap.x;
     collisionTilemap.y = groundTilemap.y;
 
     isometricWalls = new IsometricWalls(dungeonTiles);
     wallTilemap = new FlxTilemap();
     wallTilemap.loadMap(FlxStringUtil.arrayToCSV(flattenArray(isometricWalls.tiles), SIZE),
-                          "assets/images/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
+                          "assets/images/areas/" + G.world + "/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
     wallTilemap.x = groundTilemap.x;
     wallTilemap.y = groundTilemap.y;
     add(wallTilemap);
@@ -59,7 +59,7 @@ class Dungeon extends FlxGroup
     isometricTops = new IsometricTops(isometricWalls);
     wallTopTilemap = new FlxTilemap();
     wallTopTilemap.loadMap(FlxStringUtil.arrayToCSV(flattenArray(isometricTops.tiles), SIZE),
-                          "assets/images/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
+                          "assets/images/areas/" + G.world + "/tiles.png", 32, 32, FlxTilemapAutoTiling.OFF);
     wallTopTilemap.x = groundTilemap.x;
     wallTopTilemap.y = groundTilemap.y;
     

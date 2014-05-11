@@ -69,8 +69,6 @@ class IsometricWalls
       }
     }
 
-    cutLakes();
-
     //Find edges
     for(y in 0...dungeonTiles.height) {
       for(x in 0...dungeonTiles.width) {
@@ -81,48 +79,7 @@ class IsometricWalls
     }
   }
 
-  private function cutLakes():Void {
-    for(j in 0...10) { 
-      position.x = FlxRandom.intRanged(0, dungeonTiles.width - (BRUSH_SIZE + 1));
-      position.y = FlxRandom.intRanged(0, dungeonTiles.height - (BRUSH_SIZE + 1));
-      if(outOfBounds()) changeDirection();
-      for(i in 0...10) {
-        position.x += direction.x;
-        position.y += direction.y;
-
-        
-        var localSize = BRUSH_SIZE + (FlxRandom.chanceRoll(30) ? 1 : 0);
-        for(x in 0...localSize) {
-          for(y in 0...localSize) {
-            var localY = Std.int(position.y) + y;
-            var localX = Std.int(position.x) + x;
-
-            tiles[localY][localX] = 0;
-          }
-        }
-        changeDirection();
-      }
-    }
-  }
   
-  private function changeDirection():Void {
-    if (FlxRandom.chanceRoll(40) || outOfBounds()) {
-
-      direction.x = FlxRandom.intRanged(-1,1);
-      direction.y = FlxRandom.intRanged(-1,1);
-    }
-
-    if(outOfBounds())
-      changeDirection();
-  }
-
-  private function outOfBounds():Bool {
-    return position.x + direction.x * (BRUSH_SIZE + 1) + BRUSH_SIZE >= dungeonTiles.width ||
-           position.x + direction.x * (BRUSH_SIZE + 1) < 0 ||
-           position.y + direction.y * (BRUSH_SIZE + 1) + BRUSH_SIZE >= dungeonTiles.height ||
-           position.y + direction.y * (BRUSH_SIZE + 1) < 0;
-  }
-
   private function layTile(x:Int, y:Int):Void {
     var quadIndex:Int = 0;
     var tileIndex = 0;

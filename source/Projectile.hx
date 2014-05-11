@@ -42,7 +42,6 @@ class Projectile extends FlxSpriteGroup
 
     projectile = new ProjectileSprite();
     projectile.onCollisionCallback = onCollide;
-    projectile.scale.x = projectile.scale.y = 0.25;
     add(projectile);
 
     G.projectiles.add(this);
@@ -63,6 +62,8 @@ class Projectile extends FlxSpriteGroup
     projectile.y = Y;
     shadow.x = X;
     shadow.y = Y;
+
+    projectile.scale.x = projectile.scale.y = 0.25 * G.projectileLevel;
 
     exists = projectile.exists = shadow.exists = particleGroup.exists = explosionSprite.exists = true;
     spawnParticle();
@@ -91,11 +92,11 @@ class Projectile extends FlxSpriteGroup
       particle.animation.add("fade", [0,1,2,2,3,3,4,4,4], 15, false);
       particle.animation.play("fade");
       particle.solid = false;
-      particle.scale.x = particle.scale.y = 0.25;
       new FlxTimer().start(0.6, function(t) { particle.exists = false; });
       particleGroup.add(particle);
     }
 
+    particle.scale.x = particle.scale.y = 0.25 * G.projectileLevel;
     particle.x = projectile.x + FlxRandom.intRanged(-5, 5) + 4;
     particle.y = projectile.y + FlxRandom.intRanged(-5, 5) - 12;
     particle.velocity.x = projectile.velocity.x/4;
