@@ -41,7 +41,7 @@ class DungeonTiles
       position.x += direction.x;
       position.y += direction.y;
 
-      var localSize = BRUSH_SIZE + ((FlxRandom.chanceRoll(5) || i == 0) ? 1 : 0);
+      var localSize = BRUSH_SIZE + ((FlxRandom.chanceRoll(5) || i == 0 || i == 400) ? 1 : 0);
       for(x in 0...localSize) {
         for(y in 0...localSize) {
           var localY = Std.int(position.y) + y;
@@ -51,14 +51,14 @@ class DungeonTiles
           if(FlxRandom.chanceRoll(3)) {
             G.slimeLocations.push(new FlxPoint(localX - Dungeon.SIZE/2, localY - Dungeon.SIZE/2));
           }
-          if(FlxRandom.chanceRoll(0.2) && powerUpCount < 3) {
+          if(FlxRandom.chanceRoll(2) && powerUpCount < 3) {
             powerUpCount++;
             G.powerUpLocations.push(new FlxPoint(localX - Dungeon.SIZE/2, localY - Dungeon.SIZE/2));
           }
         }
       }
       if(i == 400) {
-        G.exitLocation = new FlxPoint(position.x - Dungeon.SIZE/2, position.y - Dungeon.SIZE/2);
+        G.exitLocation = new FlxPoint((position.x - Dungeon.SIZE/2) * 32, (position.y - Dungeon.SIZE/2) * 32);
       }
       changeDirection();
     }

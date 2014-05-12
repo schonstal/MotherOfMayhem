@@ -46,7 +46,7 @@ class Slime extends FlxSprite
   public function new(X:Float=0, Y:Float=0) {
     super();
 
-    health = 3;
+    health = 3 * G.world;
 
     x = X;
     y = Y;

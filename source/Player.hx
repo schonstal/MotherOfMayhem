@@ -115,8 +115,6 @@ class Player extends FlxSprite
       staminaTime = 0.5;
     }
 
-    if(FlxG.keys.justPressed.UP) G.projectileLevel++;
-
     facing = FlxG.mouse.x < x + width/2 ? FlxObject.LEFT : FlxObject.RIGHT;
 
     if(!dashing && !justHurt) {

@@ -45,11 +45,13 @@ class PlayState extends FlxState
 
   private var dead:Bool = false;
   private var exitSprite:FlxSprite;
+  private var exiting:Bool = false;
+
+  private var exitSpriteCollider:FlxObject;
 
   override public function create():Void {
     super.create();
     Projectile.init();
-    G.init();
     G.resetLocations();
 
     FlxG.camera.flash(0x181d23, 1);
@@ -63,6 +65,15 @@ class PlayState extends FlxState
     G.reticle = new Reticle();
     G.dungeonObjects = new FlxTypedGroup<FlxObject>();
     G.projectiles = new FlxTypedGroup<FlxObject>();
+
+    exitSprite = new FlxSprite(G.exitLocation.x, G.exitLocation.y);
+    exitSprite.loadGraphic("assets/images/areas/" + (G.level < 3 ? 1 : 2) + "/exit.png");
+    add(exitSprite);
+
+    //FUCK OFFSETS
+    exitSpriteCollider = new FlxObject(exitSprite.x + 43, exitSprite.y + 43);
+    exitSpriteCollider.width = exitSpriteCollider.height = 10;
+    add(exitSpriteCollider);
 
     G.player = new Player();
     G.dungeonObjects.add(G.player);
@@ -131,7 +142,7 @@ class PlayState extends FlxState
       if(Std.is(enemy, Slime)) {
         if(!G.player.invulnerable && enemy.dashing) {
           FlxG.collide(cast(enemy, Slime), G.player);
-          player.hit(1, enemy.direction);
+          player.hit(G.world, enemy.direction);
         }
       }
     });
@@ -176,6 +187,12 @@ class PlayState extends FlxState
       powerUps.remove(cast(powerup, FlxObject));
     });
 
+    FlxG.overlap(exitSpriteCollider, G.player, function(c,p):Void {
+      G.level += 1;
+      if(G.level == 4) G.world++;
+      FlxG.switchState(new PlayState());
+    });
+
     G.dungeonObjects.sort(FlxSort.byY, FlxSort.ASCENDING);
 
     if(G.player.completelyDead) {
@@ -186,6 +203,7 @@ class PlayState extends FlxState
         });
       }
       if(FlxG.mouse.justPressed) {
+        G.init();
         FlxG.switchState(new PlayState());
       }
     }
