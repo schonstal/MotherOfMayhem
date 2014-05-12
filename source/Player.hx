@@ -133,6 +133,7 @@ class Player extends FlxSprite
   public function hit(damage:Int=0, direction:FlxVector):Void {
     if(invulnerable) return;
     FlxG.camera.flash(0x88c1212c, 0.3);
+    FlxG.sound.play("assets/sounds/player_hit.wav", 0.8);
 
     velocity.x = direction.x * 100;
     velocity.y = direction.y * 100;
@@ -154,6 +155,7 @@ class Player extends FlxSprite
     health = 0;
     dead = true;
     animation.play("die");
+    FlxG.sound.play("assets/sounds/dying.wav", 0.8);
     FlxG.timeScale = 0.1;
   }
 
@@ -197,7 +199,7 @@ class Player extends FlxSprite
   }
 
   private function shootProjectile():Void {
-    if(shooting || justHurt || !useStamina(30)) return;
+    if(shooting || justHurt || !useStamina(30 + (15 * G.projectileLevel))) return;
 
     G.reticle.deactivate();
     shooting = true;

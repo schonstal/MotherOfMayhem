@@ -30,6 +30,7 @@ class StaminaBar extends StatBar
 
   override public function update():Void {
     super.update();
+    upgradeWidth(Std.int(G.maxStamina * 0.6));
     setBar(G.player.stamina / G.maxStamina);
 
     if(G.player.stamina <= 0) {

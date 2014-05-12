@@ -46,7 +46,7 @@ class Slime extends FlxSprite
   public function new(X:Float=0, Y:Float=0) {
     super();
 
-    health = 2;
+    health = 3;
 
     x = X;
     y = Y;
@@ -155,6 +155,7 @@ class Slime extends FlxSprite
   }
 
   private function startDash():Void {
+    FlxG.sound.play("assets/sounds/enemy_dash.wav", 0.5);
     direction = new FlxVector(G.player.x - x, G.player.y - y).normalize();
 
     velocity.x = direction.x * -100;

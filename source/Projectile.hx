@@ -45,7 +45,7 @@ class Projectile extends FlxSpriteGroup
 
     explosionSprite = new FlxSprite();
     explosionSprite.loadGraphic("assets/images/projectiles/player/hit.png", true, 64, 64);
-    explosionSprite.animation.add("explode", [0,1,2,3,4,5], 20, false);
+    explosionSprite.animation.add("explode", [0,1,2,3,4,5,6], 20, false);
     explosionSprite.solid = false;
     add(explosionSprite);
 
@@ -128,7 +128,6 @@ class Projectile extends FlxSpriteGroup
     explosionSprite.y = projectile.y - 38;
     explosionSprite.visible = true;
     explosionSprite.animation.play("explode");
-    new FlxTimer().start(6.0/20.0, function(t) { visible = false; });
     new FlxTimer().start(3, function(t) { exists = false; });
     projectile.exists = shadow.exists = false;
     FlxG.camera.shake(0.02, 0.3);

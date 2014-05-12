@@ -17,6 +17,7 @@ class DungeonTiles
   var direction:FlxVector;
 
   var dirty:Bool = false;
+  var powerUpCount = 0;
 
   public function new(width:Int, height:Int) {
     this.width = width;
@@ -50,7 +51,14 @@ class DungeonTiles
           if(FlxRandom.chanceRoll(3)) {
             G.slimeLocations.push(new FlxPoint(localX - Dungeon.SIZE/2, localY - Dungeon.SIZE/2));
           }
+          if(FlxRandom.chanceRoll(0.2) && powerUpCount < 3) {
+            powerUpCount++;
+            G.powerUpLocations.push(new FlxPoint(localX - Dungeon.SIZE/2, localY - Dungeon.SIZE/2));
+          }
         }
+      }
+      if(i == 400) {
+        G.exitLocation = new FlxPoint(position.x - Dungeon.SIZE/2, position.y - Dungeon.SIZE/2);
       }
       changeDirection();
     }

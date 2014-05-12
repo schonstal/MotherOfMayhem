@@ -35,6 +35,7 @@ class PlayState extends FlxState
   private var dungeon:Dungeon;
   private var enemies:FlxTypedGroup<FlxObject>;
   private var deadEnemies:FlxTypedGroup<FlxObject>;
+  private var powerUps:FlxTypedGroup<FlxObject>;
 
   private var projectiles:FlxTypedGroup<FlxObject>;
 
@@ -43,12 +44,13 @@ class PlayState extends FlxState
   private var deathMessageText:FlxText;
 
   private var dead:Bool = false;
+  private var exitSprite:FlxSprite;
 
   override public function create():Void {
     super.create();
     Projectile.init();
     G.init();
-    G.slimeLocations = new Array<FlxPoint>();
+    G.resetLocations();
 
     FlxG.camera.flash(0x181d23, 1);
     FlxG.mouse.visible = false;
@@ -91,6 +93,16 @@ class PlayState extends FlxState
         enemies.add(slime);
         G.dungeonObjects.add(slime);
         G.dungeonObjects.add(slime.shadow);
+      }
+    }
+
+    powerUps = new FlxTypedGroup<FlxObject>();
+    for(location in G.powerUpLocations) {
+      if((location.x > 1 || location.x < -1) && (location.y > 1 || location.y < -1)) {
+        var powerUp = new PowerUp(location.x*32,location.y*32);
+        powerUps.add(powerUp);
+        G.dungeonObjects.add(powerUp);
+        G.dungeonObjects.add(powerUp.shadow);
       }
     }
     
@@ -144,6 +156,24 @@ class PlayState extends FlxState
           }
         }
       }
+    });
+
+    FlxG.overlap(powerUps, G.player, function(powerup, player):Void {
+      if(!Std.is(powerup, PowerUp)) return;
+      powerup.exists = false;
+      FlxG.camera.flash(0x22ffffff, 0.3);
+      if(powerup.type == 0) {
+        G.maxHealth += 1;
+        G.player.health = G.maxHealth;
+      }
+      if(powerup.type == 1) {
+        G.maxStamina += 30;
+      }
+      if(powerup.type == 2) {
+        G.projectileLevel += 1;
+      }
+      powerup.shadow.visible = false;
+      powerUps.remove(cast(powerup, FlxObject));
     });
 
     G.dungeonObjects.sort(FlxSort.byY, FlxSort.ASCENDING);

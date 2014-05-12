@@ -12,6 +12,8 @@ class G
   public static var dungeon:Dungeon;
   public static var reticle:Reticle;
   public static var slimeLocations:Array<FlxPoint>;
+  public static var powerUpLocations:Array<FlxPoint>;
+  public static var exitLocation:FlxPoint;
 
   public static var projectileLevel = 1;
   public static var maxHealth = 6;
@@ -28,5 +30,10 @@ class G
     maxStamina = 100;
     level = 1;
     world = 1;
+  }
+
+  public static function resetLocations():Void {
+    G.slimeLocations = new Array<FlxPoint>();
+    G.powerUpLocations = new Array<FlxPoint>();
   }
 }
