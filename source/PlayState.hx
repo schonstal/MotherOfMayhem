@@ -16,6 +16,7 @@ import flixel.util.FlxRandom;
 import flixel.util.FlxPoint;
 import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
+import flixel.util.FlxVector;
 
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxEase.EaseFunction;
@@ -36,6 +37,12 @@ class PlayState extends FlxState
 
   private var projectiles:FlxTypedGroup<FlxObject>;
 
+  private var deathOverlay:FlxSprite;
+  private var deathText:FlxText;
+  private var deathMessageText:FlxText;
+
+  private var dead:Bool = false;
+
   override public function create():Void {
     super.create();
     Projectile.init();
@@ -54,6 +61,7 @@ class PlayState extends FlxState
 
     G.player = new Player();
     G.dungeonObjects.add(G.player);
+    G.dungeonObjects.add(G.player.shadow);
     add(G.dungeonObjects);
 
     add(G.dungeon.wallTopTilemap);
@@ -78,10 +86,23 @@ class PlayState extends FlxState
     var slime = new Slime(i*32,j*32);
     enemies.add(slime);
     G.dungeonObjects.add(slime);
+    G.dungeonObjects.add(slime.shadow);
     }
     }
+    
+    var healthBar = new HealthBar();
+    add(healthBar);
 
-//    add(new Slime(, 100));
+    var staminaBar = new StaminaBar();
+    add(staminaBar);
+
+    deathOverlay = new FlxSprite();
+    deathOverlay.loadGraphic("assets/images/game_over.png");
+    deathOverlay.scrollFactor.x = deathOverlay.scrollFactor.y = 0;
+    deathOverlay.alpha = 0;
+    add(deathOverlay);
+
+    FlxG.sound.playMusic("assets/music/areas/" + G.world + "/a.wav");
   }
 
   override public function update():Void {
@@ -89,12 +110,43 @@ class PlayState extends FlxState
     FlxG.collide(G.player, G.dungeon.collisionTilemap, function(a,b):Void { G.player.cancelDash(); });
     FlxG.collide(enemies, G.dungeon.collisionTilemap);
 
-    FlxG.collide(enemies, G.player);
+    FlxG.overlap(enemies, G.player, function(enemy, player):Void {
+      if(Std.is(enemy, Slime)) {
+        if(!G.player.invulnerable && enemy.dashing) {
+          FlxG.collide(cast(enemy, Slime), G.player);
+          player.hit(1, enemy.direction);
+        }
+      }
+    });
 
     FlxG.collide(G.projectiles, G.dungeon.wallTilemap, function(a,b):Void {
       if(Std.is(a, ProjectileSprite)) a.onCollide();
     });
 
+    FlxG.collide(G.projectiles, enemies, function(projectile, enemy):Void {
+      if(Std.is(projectile, ProjectileSprite)) projectile.onCollide();
+
+      var direction:FlxVector = new FlxVector(projectile.velocity.x, projectile.velocity.y);
+      if(Std.is(enemy, Slime)) {
+        enemy.hit(G.projectileLevel, direction.normalize());
+        if(enemy.dead) {
+          enemies.remove(cast(enemy, FlxObject));
+        }
+      }
+    });
+
     G.dungeonObjects.sort(FlxSort.byY, FlxSort.ASCENDING);
+
+    if(G.player.completelyDead) {
+      if(!dead) {
+        dead = true;
+        new FlxTimer(0.5, function(t) {
+          FlxTween.tween(deathOverlay, { alpha: 1 }, 1, { ease: FlxEase.quadIn });
+        });
+      }
+      if(FlxG.mouse.justPressed) {
+        FlxG.switchState(new PlayState());
+      }
+    }
   }
 }

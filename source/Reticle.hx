@@ -15,6 +15,7 @@ class Reticle extends FlxSprite
 {
   var bigSprite:FlxSprite;
   var littleSprite:FlxSprite;
+  var usable:Bool = true;
   
   public function new() {
     super();
@@ -28,15 +29,21 @@ class Reticle extends FlxSprite
   }
 
   public function activate():Void {
-    alpha = 0.75;
+    usable = true;
   }
 
   public function deactivate():Void {
-    alpha = 0.25;
+    usable = false;
   }
 
   public override function update():Void {
     super.update();
+
+    if(usable && G.player.stamina > 0) {
+      alpha = 0.75;
+    } else {
+      alpha = 0.25;
+    }
 
     x = FlxG.mouse.x - width/2 + 1;
     y = FlxG.mouse.y - height/2 + 1;

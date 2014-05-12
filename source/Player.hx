@@ -11,6 +11,7 @@ import flixel.group.FlxTypedGroup;
 
 import flixel.util.FlxVector;
 import flixel.util.FlxRandom;
+import flixel.util.FlxTimer;
 
 import flash.display.BlendMode;
 
@@ -31,17 +32,32 @@ class Player extends FlxSprite
   inline static var RECOIL_SPEED = -200;
   inline static var RECOIL_DURATION = 0.2;
 
-  public var invulnerable:Bool = true;
+  inline static var STAMINA_REGEN = 100;
+
+  public var invulnerable:Bool = false;
   public var started:Bool = false;
+
+  public var stamina:Float = 0;
+  public var shadow:FlxSprite;
+
+  var staminaTimer:Float = 0;
+  var staminaTime:Float = 0.5;
 
   var dashTween:VarTween;
   var dashScaleTween:VarTween;
   
   var dashing:Bool = false;
   var shooting:Bool = false;
+  var justHurt:Bool = false;
+  var dead:Bool = false;
+
+  public var completelyDead:Bool = false;
 
   public function new() {
     super();
+
+    health = G.maxHealth;
+    stamina = G.maxStamina;
 
     loadGraphic("assets/images/player.png", true, 32, 32);
     setFacingFlip(FlxObject.LEFT, false, false);
@@ -52,6 +68,8 @@ class Player extends FlxSprite
     animation.add("idle", [0,1,1,2,3,3], 10);
     animation.add("dash", [12]);
     animation.add("shoot", [12]);
+    animation.add("hurt", [13]);
+    animation.add("die", [14,14,14,14,15,16,17,18,19,19], 20, false);
     animation.callback = onAnimate;
 
     width = 22;
@@ -61,27 +79,81 @@ class Player extends FlxSprite
 
     x = 36;
     y = 0;
+
+    shadow = new FlxSprite();
+    shadow.loadGraphic("assets/images/player_shadow.png");
+    shadow.offset.y = -8;
+    shadow.offset.x = -2;
+  }
+
+  public function updateShadow():Void {
+    shadow.x = x;
+    shadow.y = y - 1;
   }
 
   public override function update():Void {
+    super.update();
+    updateShadow();
+
+    if(dead) {
+      if(FlxG.timeScale < 1) {
+        FlxG.timeScale += FlxG.elapsed * 2;
+      }
+      return;
+    }
+
     if(!started) {
       velocity.x = velocity.y = 0;
       animation.play("idle");
-      super.update();
       return;
+    }
+
+    staminaTimer += FlxG.elapsed;
+    if(staminaTimer >= staminaTime) {
+      if(stamina <= G.maxStamina) stamina += FlxG.elapsed * STAMINA_REGEN;
+      else stamina = G.maxStamina;
+      staminaTime = 0.5;
     }
 
     if(FlxG.keys.justPressed.UP) G.projectileLevel++;
 
     facing = FlxG.mouse.x < x + width/2 ? FlxObject.LEFT : FlxObject.RIGHT;
 
-    if(!dashing) {
+    if(!dashing && !justHurt) {
       processMovement();
-    } else {
+    } else if(dashing) {
       animation.play("dash");
     }
 
-    super.update();
+    if(justHurt && Math.abs(velocity.x) < 1 && Math.abs(velocity.y) < 1) {
+      onDashComplete(dashTween);
+    }
+  }
+
+  public function hit(damage:Int=0, direction:FlxVector):Void {
+    if(invulnerable) return;
+
+    velocity.x = direction.x * 100;
+    velocity.y = direction.y * 100;
+    drag.x = 400;
+    drag.y = 400;
+    animation.play("hurt");
+    justHurt = true;
+    invulnerable = true;
+    alpha = 0.6;
+    G.reticle.deactivate();
+    FlxG.camera.shake(damage * 0.0075, 0.3);
+    health -= damage;
+    if(health <= 0) {
+      die();
+    }
+  }
+
+  private function die():Void {
+    health = 0;
+    dead = true;
+    animation.play("die");
+    FlxG.timeScale = 0.1;
   }
 
   private function processMovement():Void {
@@ -124,14 +196,14 @@ class Player extends FlxSprite
   }
 
   private function shootProjectile():Void {
-    if(shooting) return;
+    if(shooting || justHurt || !useStamina(30)) return;
 
     G.reticle.deactivate();
     shooting = true;
 
     FlxG.sound.play("assets/sounds/fire_orb.wav");
     dashing = true;
-    var p:Projectile = Projectile.recycled(x,y);
+    var p:Projectile = Projectile.recycled(getMidpoint().x,getMidpoint().y);
     G.dungeonObjects.add(p);
 
     velocity.x = p.direction.x * RECOIL_SPEED;
@@ -151,7 +223,7 @@ class Player extends FlxSprite
   }
 
   private function startDash(direction:FlxVector):Void {
-    if(shooting) return;
+    if(shooting || justHurt || !useStamina(40)) return;
     FlxG.sound.play("assets/sounds/dash.wav", 0.3);
 
     velocity.x = direction.x * DASH_SPEED;
@@ -179,15 +251,30 @@ class Player extends FlxSprite
     velocity.x = velocity.y = 0;
   }
 
+
   private function onDashComplete(callback):Void {
     dashing = false;
     shooting = false;
+    justHurt = false;
     drag.x = drag.y = 0;
     G.reticle.activate();
+    invulnerable = false;
+    alpha = 1;
   }
 
   private function onIframeComplete(callback):Void {
     invulnerable = false;
+  }
+
+  private function useStamina(value:Int):Bool {
+    if (stamina <= 0) return false;
+    stamina -= value;
+    staminaTimer = 0;
+    if(stamina < 0) {
+      stamina = 0;
+      staminaTime = 1;
+    }
+    return true;
   }
 
   private function onAnimate(name:String, frame:Int, frameIndex:Int):Void {
@@ -195,6 +282,12 @@ class Player extends FlxSprite
       if (frame == 0 || frame == 4) {
         FlxG.sound.play("assets/sounds/footsteps/" + FlxRandom.intRanged(1,2) + ".wav", 0.3);
       }
+    }
+
+    if (name == "die" && frame == 8) {
+      completelyDead = true;
+      visible = false;
+      shadow.visible = false;
     }
   }
 }

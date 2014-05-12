@@ -13,9 +13,12 @@ class G
   public static var reticle:Reticle;
 
   public static var projectileLevel = 1;
+  public static var maxHealth = 6;
+  public static var maxStamina = 100;
 
   public static var player:Player;
 
   public static var level = 1;
   public static var world = 1;
+
 }
