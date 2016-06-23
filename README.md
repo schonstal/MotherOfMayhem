@@ -1,4 +1,4 @@
-# MotherOfMayhem
+# Mother of Mayhem
 Isometric Roguelike Shooter
 
 ![](assets/sworcery/area1_mock.png)
